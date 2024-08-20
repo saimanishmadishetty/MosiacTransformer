@@ -6,7 +6,7 @@ import base64
 def pre_process(input):
     image_data = base64.b64decode(input)
     # Open the image and convert to RGB
-    original_image = Image.open(BytesIO(image_data))
+    original_image = Image.open(BytesIO(image_data)).convert('RGB')
     # Convert the image to a tensor
     image = original_image.resize((224, 224), Image.LANCZOS)
     # Convert the image to a numpy array and normalize it
@@ -19,8 +19,9 @@ def post_process(input):
     output = output.reshape(3, 224, 224)
     result = np.clip(output, 0, 255)
     result = result.transpose(1, 2, 0).astype("uint8")
-    img = Image.fromarray(result)
+    image = Image.fromarray(result)
     buffered = BytesIO()
-    img.save(buffered, format="JPEG")
+    image_format = image.format
+    image.save(buffered, format="JPEG")
     img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
     return img_str
